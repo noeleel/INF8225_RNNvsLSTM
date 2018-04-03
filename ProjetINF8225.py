@@ -178,55 +178,12 @@ for sentence in b.tagged_sents():
             data_to_idx[word] = len(data_to_idx)
         if tag not in tag_to_ix:
             tag_to_ix[tag] = len(tag_to_ix)"""
-
-def prepare_sequence(seq, to_ix):
-    idxs = [to_ix[w] for w in seq]
-    tensor = LongTensor(idxs)
-    return autograd.Variable(tensor)
-
-
-# These will usually be more like 32 or 64 dimensional.
-# We will keep them small, so we can see how the weights change as we train.
-EMBEDDING_DIM = 256
-HIDDEN_DIM = 6
-
-"""class RNN(nn.Module):
-
-    
-#    input_size – The number of expected features in the input x
-#    hidden_size – The number of features in the hidden state h
-#    num_layers – Number of recurrent layers. E.g., setting num_layers=2 would mean stacking two RNNs together to form a stacked RNN, with the second RNN taking in outputs of the first RNN and computing the final results. Default: 1
-#    nonlinearity – The non-linearity to use. Can be either ‘tanh’ or ‘relu’. Default: ‘tanh’
-#    bias – If False, then the layer does not use bias weights b_ih and b_hh. Default: True
-#    batch_first – If True, then the input and output tensors are provided as (batch, seq, feature)
-#    dropout – If non-zero, introduces a Dropout layer on the outputs of each RNN layer except the last layer, with dropout probablity equal to dropout. Default: 0
-#    bidirectional – If True, becomes a bidirectional RNN. Default: False
-
-    def __init__(self,input_size,hidden_size, num_layers, bias=True):
-        super().__init__()
-        self.num_layers = num_layers
-        self.hidden_size = hidden_size
-
-        self.embedding = nn.Embedding(input_size, hidden_size)
-        self.rnn = nn.RNN(input_size,hidden_size, num_layers)
-
-    def forward(self, input_x, hidden):
-        embedded = self.embedding(input_x).view(1, 1, -1)
-        output = embedded
-        for i in range(self.n_layers):
-            output, hidden = self.rnn(output, hidden)
-        return output, hidden
-
-    def initHidden(self):
-        result = Variable(zeros(1, 1, self.hidden_size))
-        return result """
-
 # Mise en forme de l'ensemble d'entrainement
 word_to_ix = {}
 tag_to_ix = {}
 
 training_data = []
-for sentence in b.tagged_sents()[0:500]:
+for sentence in b.tagged_sents()[0:100]:
     L_w = []
     L_t = []
     for word, tag in sentence:
@@ -237,6 +194,48 @@ for sentence in b.tagged_sents()[0:500]:
             word_to_ix[word] = len(word_to_ix)
         if tag not in tag_to_ix:
             tag_to_ix[tag] = len(tag_to_ix)
+
+def prepare_sequence(seq, to_ix):
+    idxs = [to_ix[w] for w in seq]
+    tensor = LongTensor(idxs)
+    return autograd.Variable(tensor)
+
+
+# These will usually be more like 32 or 64 dimensional.
+# We will keep them small, so we can see how the weights change as we train.
+EMBEDDING_DIM = 6
+HIDDEN_DIM = 6
+
+class RNN(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.rnn = nn.RNN(embedding_dim, hidden_dim)
+
+        # The linear layer that maps from hidden state space to tag space
+        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
+        self.hidden = self.init_hidden()
+
+    def init_hidden(self):
+        # Before we've done anything, we dont have any hidden state.
+        # Refer to the Pytorch documentation to see exactly
+        # why they have this dimensionality.
+        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
+        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
+                autograd.Variable(zeros(1, 1, self.hidden_dim)))
+
+    def forward(self, sentence):
+        embeds = self.word_embeddings(sentence)
+        rnn_out, self.hidden = self.rnn(
+            embeds.view(len(sentence), 1, -1), self.hidden)
+        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
+        tag_scores = F.log_softmax(tag_space, dim=1)
+        return tag_scores
             
 class LSTM(nn.Module):
 
@@ -269,8 +268,11 @@ class LSTM(nn.Module):
         tag_space = self.hidden2tag(lstm_out.view(len(sentence), -1))
         tag_scores = F.log_softmax(tag_space, dim=1)
         return tag_scores
-    
-model = LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+
+if input("Quel modele") == 'LSTM':
+    model = LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+else:
+    model = RNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
 loss_function = nn.NLLLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.1)
 
@@ -281,6 +283,7 @@ tag_scores = model(inputs)
 print(tag_scores)
 
 for epoch in range(10):  # again, normally you would NOT do 300 epochs, it is toy data
+    print(epoch)
     for sentence, tags in training_data:
         # Step 1. Remember that Pytorch accumulates gradients.
         # We need to clear them out before each instance
@@ -316,4 +319,5 @@ tag_scores = model(inputs)
 print(tag_scores)
 
 Loss_array = np.array(loss)
-plt.plot(loss)
+Loss_array = Loss_array.flatten()
+plt.plot(Loss_array)
