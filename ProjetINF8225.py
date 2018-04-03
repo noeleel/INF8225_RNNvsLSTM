@@ -155,64 +155,29 @@ des liens ici:
         ` ``
 
 """
-from nltk import word_tokenize as wt, pos_tag as pt
 from nltk.corpus import brown as b
 import numpy as np
 import matplotlib.pyplot as plt
-from torch import *
 import torch.autograd as autograd
-from torch.autograd import Variable
 import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torch import nn
-from torch import optim
+from torch import nn, zeros, LongTensor, optim
 
-# Definition du dictionnaire. Chaque entite grammaticale est associee a un nombre.
-pos_tag_dict = {0 : "CC",
-                1 : "CD",
-                2 : "DT",
-                3 : "EX",
-                4 : "FW",
-                5 : "IN",
-                6 : "JJ",
-                7 : "JJR",
-                8 : "JJS",
-                9 : "LS",
-                10: "MD",
-                11: "NN",
-                12: "NNS",
-                13: "NNP",
-                14: "NNPS",
-                15: "PDT",
-                16: "POS",
-                17: "PRP",
-                18: "PRP$",
-                19: "RB",
-                20: "RBR",
-                21: "RBS",
-                22: "RP",
-                23: "TO",
-                24: "UH",
-                25: "VB",
-                26: "VBD",
-                27: "VBG",
-                28: "VBN",
-                29: "VBP",
-                30: "VBZ",
-                31: "WDT",
-                32: "WP",
-                33: "WP$",
-                34: "WRB",
-                35: "''",
-                36: "$",
-                37: "(",
-                38: ")",
-                39: ",",
-                40: "--",
-                41: ".",
-                42: ":"}
+"""# Mise en forme du corpus 
+data_to_idx = {}
+tag_to_ix = {}
 
-# Mise en forme du corpus 
+data = []
+for sentence in b.tagged_sents():
+    L_w = []
+    L_t = []
+    for word, tag in sentence:
+        L_w.append(word)
+        L_t.append(tag)
+        data.append((L_w,L_t))
+        if word not in data_to_idx:
+            data_to_idx[word] = len(data_to_idx)
+        if tag not in tag_to_ix:
+            tag_to_ix[tag] = len(tag_to_ix)"""
 
 def prepare_sequence(seq, to_ix):
     idxs = [to_ix[w] for w in seq]
@@ -220,36 +185,23 @@ def prepare_sequence(seq, to_ix):
     return autograd.Variable(tensor)
 
 
-training_data = [
-    ("The dog ate the apple".split(), ["DET", "NN", "V", "DET", "NN"]),
-    ("Everybody read that book".split(), ["NN", "V", "DET", "NN"])
-]
-word_to_ix = {}
-for sent, tags in training_data:
-    for word in sent:
-        if word not in word_to_ix:
-            word_to_ix[word] = len(word_to_ix)
-print(word_to_ix)
-tag_to_ix = {"DET": 0, "NN": 1, "V": 2}
-
 # These will usually be more like 32 or 64 dimensional.
 # We will keep them small, so we can see how the weights change as we train.
-EMBEDDING_DIM = 6
+EMBEDDING_DIM = 256
 HIDDEN_DIM = 6
 
-class RNN(nn.Module):
-    """
-    
-    input_size – The number of expected features in the input x
-    hidden_size – The number of features in the hidden state h
-    num_layers – Number of recurrent layers. E.g., setting num_layers=2 would mean stacking two RNNs together to form a stacked RNN, with the second RNN taking in outputs of the first RNN and computing the final results. Default: 1
-    nonlinearity – The non-linearity to use. Can be either ‘tanh’ or ‘relu’. Default: ‘tanh’
-    bias – If False, then the layer does not use bias weights b_ih and b_hh. Default: True
-    batch_first – If True, then the input and output tensors are provided as (batch, seq, feature)
-    dropout – If non-zero, introduces a Dropout layer on the outputs of each RNN layer except the last layer, with dropout probablity equal to dropout. Default: 0
-    bidirectional – If True, becomes a bidirectional RNN. Default: False
+"""class RNN(nn.Module):
 
-    """
+    
+#    input_size – The number of expected features in the input x
+#    hidden_size – The number of features in the hidden state h
+#    num_layers – Number of recurrent layers. E.g., setting num_layers=2 would mean stacking two RNNs together to form a stacked RNN, with the second RNN taking in outputs of the first RNN and computing the final results. Default: 1
+#    nonlinearity – The non-linearity to use. Can be either ‘tanh’ or ‘relu’. Default: ‘tanh’
+#    bias – If False, then the layer does not use bias weights b_ih and b_hh. Default: True
+#    batch_first – If True, then the input and output tensors are provided as (batch, seq, feature)
+#    dropout – If non-zero, introduces a Dropout layer on the outputs of each RNN layer except the last layer, with dropout probablity equal to dropout. Default: 0
+#    bidirectional – If True, becomes a bidirectional RNN. Default: False
+
     def __init__(self,input_size,hidden_size, num_layers, bias=True):
         super().__init__()
         self.num_layers = num_layers
@@ -267,9 +219,25 @@ class RNN(nn.Module):
 
     def initHidden(self):
         result = Variable(zeros(1, 1, self.hidden_size))
-        return result
+        return result """
 
+# Mise en forme de l'ensemble d'entrainement
+word_to_ix = {}
+tag_to_ix = {}
 
+training_data = []
+for sentence in b.tagged_sents()[0:500]:
+    L_w = []
+    L_t = []
+    for word, tag in sentence:
+        L_w.append(word)
+        L_t.append(tag)
+        training_data.append((L_w,L_t))
+        if word not in word_to_ix:
+            word_to_ix[word] = len(word_to_ix)
+        if tag not in tag_to_ix:
+            tag_to_ix[tag] = len(tag_to_ix)
+            
 class LSTM(nn.Module):
 
     def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
@@ -312,7 +280,7 @@ inputs = prepare_sequence(training_data[0][0], word_to_ix)
 tag_scores = model(inputs)
 print(tag_scores)
 
-for epoch in range(300):  # again, normally you would NOT do 300 epochs, it is toy data
+for epoch in range(10):  # again, normally you would NOT do 300 epochs, it is toy data
     for sentence, tags in training_data:
         # Step 1. Remember that Pytorch accumulates gradients.
         # We need to clear them out before each instance
@@ -346,3 +314,6 @@ tag_scores = model(inputs)
 # 1 is the index of maximum value of row 2, etc.
 # Which is DET NOUN VERB DET NOUN, the correct sequence!
 print(tag_scores)
+
+Loss_array = np.array(loss)
+plt.plot(loss)
