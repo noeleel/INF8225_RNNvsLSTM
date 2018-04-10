@@ -24,6 +24,7 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 from torch import nn, zeros, LongTensor, optim
 from time import time
+from torch.nn import init
 
 """# Mise en forme du corpus 
 data_to_idx = {}
@@ -81,56 +82,23 @@ EMBEDDING_DIM = 300
 HIDDEN_DIM = 200
 
 t_fin_dict = time()
-# DEFINITION DES MODELES ( ICI differents RNNs)
-""" Partie d'Elodie et d'Anne-Laure (?)"""
-# RNN basique (issu du tutorial Pytorch)
-class SimpleRNN(nn.Module):
+# DEFINITION DES MODELES 
+""" Partie d'Elodie """
+
+# RNN plus avancé  : le GRU
+class GRU(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
         super().__init__()
         self.hidden_dim = hidden_dim
 
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        # The LSTM takes word embeddings as inputs, and outputs hidden states
-        # with dimensionality hidden_dim.
-        self.rnn = nn.RNN(embedding_dim, hidden_dim)
-
+        self.gru = nn.GRU(embedding_dim, hidden_dim)
+        self.bias = True
         # The linear layer that maps from hidden state space to tag space
         self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
         self.hidden = self.init_hidden()
 
-    def init_hidden(self):
-        # Before we've done anything, we dont have any hidden state.
-        # Refer to the Pytorch documentation to see exactly
-        # why they have this dimensionality.
-        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
-        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
-                autograd.Variable(zeros(1, 1, self.hidden_dim)))
-
-    def forward(self, sentence):
-        embeds = self.word_embeddings(sentence)
-        rnn_out, self.hidden = self.rnn(
-            embeds.view(len(sentence), 1, -1), self.hidden)
-        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
-        tag_scores = F.log_softmax(tag_space, dim=1)
-        return tag_scores
-
-# RNN plus avancé  : le GRI
-class GRU(nn.Module):
-    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size,n_layers):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.n_layers = n_layers
-
-        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-
-        # The LSTM takes word embeddings as inputs, and outputs hidden states
-        # with dimensionality hidden_dim.
-        self.gru = nn.GRU(embedding_dim, hidden_dim, n_layers)
-
-        # The linear layer that maps from hidden state space to tag space
-        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
-        self.hidden = self.init_hidden()
 
     def init_hidden(self):
         # Before we've done anything, we dont have any hidden state.
@@ -149,18 +117,18 @@ class GRU(nn.Module):
         return tag_scores
 
 # Choix du modele, de la fonction de perte et de la fonction d'optimisation du modele
-model = SimpleRNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+model = GRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
 loss_function = nn.NLLLoss()
 optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
 # See what the scores are before training
 # Note that element i,j of the output is the score for tag j for word i.
 inputs = prepare_sequence(training_data[0][0], word_to_ix)
-tag_scores = model(inputs)
-print(tag_scores)
+#tag_scores = model(inputs)
+#print(tag_scores)
 
 Loss = []
-for epoch in range(20):
+for epoch in range(5):
 # NE PAS DECOMMENTER, avec 100 epochs, il faut AU MOINS 1 h de traitement
 #for epoch in range(100): 
     print(epoch)
