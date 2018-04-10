@@ -1,0 +1,87 @@
+						""" RESULTATS SimpleRNN """
+
+SimpleRNN : 1 seule couche ; couche cachée avec masque Linéaire ; activation de sortie log_softmax.
+
+Fonctions de pertes utilisées (cf. http://pytorch.org/docs/0.1.12/nn.html#loss-functions) : NLLLoss ; CrossEntropyLoss ; MSELoss
+Learning Rate utilisés : 0.1 ; 0.01 ; 0.001
+Nombre d'epoch utilisés : 1, 10, 50
+
+## Etat_1 (test temoin) :
+	Nombre d'epoch : 1
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.01
+	SimpleRNN_1_average : Plot vide (un seul point) - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  2.799713373184204
+		Temps d'entrainement du modele choisi (s)  17.254170417785645
+
+## Etat_2 (modif LR <) :
+	Nombre d'epoch : 1
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.001
+	SimpleRNN_1_average : Plot vide (un seul point) - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  2.797888994216919
+		Temps d'entrainement du modele choisi (s)  17.439967155456543
+
+## Etat_3 (modif LR >) :
+	Nombre d'epoch : 1
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.1
+	SimpleRNN_1_average : Plot vide (un seul point) - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  2.793612003326416
+		Temps d'entrainement du modele choisi (s)  16.229469537734985
+
+## Etat_4 (modif LR >, epoch >) :
+	Nombre d'epoch : 10
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.1
+	SimpleRNN_1_average : Ok - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  2.6920197010040283
+		Temps d'entrainement du modele choisi (s)  128.9810619354248
+
+## Etat_5 (modif epoch >) :
+	Nombre d'epoch : 10
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.01
+	SimpleRNN_1_average : Ok - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  3.209278106689453
+		Temps d'entrainement du modele choisi (s)  152.00237321853638
+
+## Etat_6 (modif epoch >) :
+	Nombre d'epoch : 50
+	Fonction de perte : NLLLoss = Negative Log Likelihood Loss
+	Learning Rate : 0.01
+	SimpleRNN_1_average : Ok - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  3.846977472305298
+		Temps d'entrainement du modele choisi (s)  1674.3058369159698
+
+## Etat_7 (modif epoch >, fonction de perte CrossEntropy) :
+	Nombre d'epoch : 50
+	Fonction de perte : CrossEntropyLoss
+	Learning Rate : 0.01
+	SimpleRNN_1_average : Ok - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : Ok - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s)  2.5263867378234863
+		Temps d'entrainement du modele choisi (s)  1732.821718454361
+
+## Etat_8 (modif epoch >, fonction de perte MSE) :
+	Nombre d'epoch : 50
+	Fonction de perte : MSELoss
+	Learning Rate : 0.01
+	SimpleRNN_1_average : !!! - plot de la moyenne de la fonction de perte sur chaque epoch.
+	SimpleRNN_1_detail : !!! - plot de toutes les pertes.
+	Timing : 
+		Temps de generation du dictionnaire (s) 
+		Temps d'entrainement du modele choisi (s) 

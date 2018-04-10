@@ -155,12 +155,15 @@ des liens ici:
         ` ``
 
 """
+#import nltk
+#nltk.download('brown')
 from nltk.corpus import brown as b
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.autograd as autograd
 import torch.nn.functional as F
 from torch import nn, zeros, LongTensor, optim
+from time import time
 
 """# Mise en forme du corpus 
 data_to_idx = {}
@@ -178,21 +181,49 @@ for sentence in b.tagged_sents():
             data_to_idx[word] = len(data_to_idx)
         if tag not in tag_to_ix:
             tag_to_ix[tag] = len(tag_to_ix)"""
+            
+t_init = time()
+# Mise en forme de l'ensemble d'entrainement
+word_to_ix = {} # Dictionnaire associant chaque mot du corpus a un indice
+tag_to_ix = {} # Dictionnaire associant chaque tag NLTK a un indice
+
+
+training_data=[]
+for sentence in b.tagged_sents() :
+    words=[]
+    tags=[]
+    words = [w[0] for w in sentence]
+    tags = [w[1] for w in sentence]
+    training_data.append((words,tags))
+training_data=training_data[:1000]
 
 def prepare_sequence(seq, to_ix):
     idxs = [to_ix[w] for w in seq]
     tensor = LongTensor(idxs)
     return autograd.Variable(tensor)
 
+word_to_ix = {}
+tag_to_ix ={}
+for sent, tags in training_data:
+    for word in sent:
+        if word not in word_to_ix:
+            word_to_ix[word] = len(word_to_ix)
+    for tag in tags :
+        if tag not in tag_to_ix :
+            tag_to_ix[tag] = len(tag_to_ix)
+#print(word_to_ix)
 
-# These will usually be more like 32 or 64 dimensional.
-# We will keep them small, so we can see how the weights change as we train.
-EMBEDDING_DIM = 256
-HIDDEN_DIM = 6
+
+# Parametres du modele, valeurs definies arbitraitement. Elles sont a modifier
+# En fonction des resultats obtenus pour les poids. 
+EMBEDDING_DIM = 300
+HIDDEN_DIM = 200
+
+t_fin_dict = time()
+
+# DEFINITION DES MODELES ( ICI differents RNNs)
 
 """class RNN(nn.Module):
-
-    
 #    input_size – The number of expected features in the input x
 #    hidden_size – The number of features in the hidden state h
 #    num_layers – Number of recurrent layers. E.g., setting num_layers=2 would mean stacking two RNNs together to form a stacked RNN, with the second RNN taking in outputs of the first RNN and computing the final results. Default: 1
@@ -221,39 +252,19 @@ HIDDEN_DIM = 6
         result = Variable(zeros(1, 1, self.hidden_size))
         return result """
 
-# Mise en forme de l'ensemble d'entrainement
-word_to_ix = {}
-tag_to_ix = {}
-
-training_data = []
-for sentence in b.tagged_sents()[0:500]:
-    L_w = []
-    L_t = []
-    for word, tag in sentence:
-        L_w.append(word)
-        L_t.append(tag)
-        training_data.append((L_w,L_t))
-        if word not in word_to_ix:
-            word_to_ix[word] = len(word_to_ix)
-        if tag not in tag_to_ix:
-            tag_to_ix[tag] = len(tag_to_ix)
-            
-class LSTM(nn.Module):
-
+class SimpleRNN(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
         super().__init__()
         self.hidden_dim = hidden_dim
 
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-
         # The LSTM takes word embeddings as inputs, and outputs hidden states
         # with dimensionality hidden_dim.
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim)
-
+        self.rnn = nn.RNN(embedding_dim, hidden_dim)
         # The linear layer that maps from hidden state space to tag space
         self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
         self.hidden = self.init_hidden()
-
+        
     def init_hidden(self):
         # Before we've done anything, we dont have any hidden state.
         # Refer to the Pytorch documentation to see exactly
@@ -264,15 +275,108 @@ class LSTM(nn.Module):
 
     def forward(self, sentence):
         embeds = self.word_embeddings(sentence)
-        lstm_out, self.hidden = self.lstm(
+        rnn_out, self.hidden = self.rnn(
             embeds.view(len(sentence), 1, -1), self.hidden)
-        tag_space = self.hidden2tag(lstm_out.view(len(sentence), -1))
+        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
         tag_scores = F.log_softmax(tag_space, dim=1)
         return tag_scores
-    
-model = LSTM(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+
+
+class DoubleRNN(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.rnn = nn.RNN(embedding_dim, hidden_dim, num_layers = 2)
+        # The linear layer that maps from hidden state space to tag space
+        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
+        self.hidden = self.init_hidden()
+        
+    def init_hidden(self):
+        # Before we've done anything, we dont have any hidden state.
+        # Refer to the Pytorch documentation to see exactly
+        # why they have this dimensionality.
+        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
+        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
+                autograd.Variable(zeros(1, 1, self.hidden_dim)))
+
+    def forward(self, sentence):
+        embeds = self.word_embeddings(sentence)
+        rnn_out, self.hidden = self.rnn(
+            embeds.view(len(sentence), 1, -1), self.hidden)
+        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
+        tag_scores = F.log_softmax(tag_space, dim=1)
+        return tag_scores
+
+class MultiRNN(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size, num_layers):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.rnn = nn.RNN(embedding_dim, hidden_dim, num_layers = num_layers, dropout = 0.5)
+        # The linear layer that maps from hidden state space to tag space
+        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
+        self.hidden = self.init_hidden()
+        
+    def init_hidden(self):
+        # Before we've done anything, we dont have any hidden state.
+        # Refer to the Pytorch documentation to see exactly
+        # why they have this dimensionality.
+        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
+        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
+                autograd.Variable(zeros(1, 1, self.hidden_dim)))
+
+    def forward(self, sentence):
+        embeds = self.word_embeddings(sentence)
+        rnn_out, self.hidden = self.rnn(
+            embeds.view(len(sentence), 1, -1), self.hidden)
+        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
+        tag_scores = F.log_softmax(tag_space, dim=1)
+        return tag_scores
+
+class TestRNN(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size, num_layers):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+
+        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.rnn = nn.RNN(embedding_dim, hidden_dim, num_layers = num_layers, dropout = 0.5)
+        # The linear layer that maps from hidden state space to tag space
+        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
+        self.hidden = self.init_hidden()
+        
+    def init_hidden(self):
+        # Before we've done anything, we dont have any hidden state.
+        # Refer to the Pytorch documentation to see exactly
+        # why they have this dimensionality.
+        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
+        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
+                autograd.Variable(zeros(1, 1, self.hidden_dim)))
+
+    def forward(self, sentence):
+        embeds = self.word_embeddings(sentence)
+        rnn_out, self.hidden = self.rnn(
+            embeds.view(len(sentence), 1, -1), self.hidden)
+        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
+        tag_scores = F.relu(tag_space)
+        return tag_scores
+
+
+#model1 = SimpleRNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+model = DoubleRNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+#model3 = MultiRNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix), 10)
+#model4 = TestRNN(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+
 loss_function = nn.NLLLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.1)
+optimizer = optim.SGD(model.parameters(), lr=0.01)
 
 # See what the scores are before training
 # Note that element i,j of the output is the score for tag j for word i.
@@ -280,7 +384,12 @@ inputs = prepare_sequence(training_data[0][0], word_to_ix)
 tag_scores = model(inputs)
 print(tag_scores)
 
-for epoch in range(10):  # again, normally you would NOT do 300 epochs, it is toy data
+Loss_average = []
+Loss = []
+epochLoss = []
+for epoch in range(50):
+    print(epoch)
+    epochLoss = []
     for sentence, tags in training_data:
         # Step 1. Remember that Pytorch accumulates gradients.
         # We need to clear them out before each instance
@@ -303,6 +412,11 @@ for epoch in range(10):  # again, normally you would NOT do 300 epochs, it is to
         loss = loss_function(tag_scores, targets)
         loss.backward()
         optimizer.step()
+        epochLoss.append(loss.data[0])
+        Loss.append(loss)
+    Loss_average.append(np.average(epochLoss))
+
+t_fin_training = time()
 
 # See what the scores are after training
 inputs = prepare_sequence(training_data[0][0], word_to_ix)
@@ -315,5 +429,14 @@ tag_scores = model(inputs)
 # Which is DET NOUN VERB DET NOUN, the correct sequence!
 print(tag_scores)
 
-Loss_array = np.array(loss)
-plt.plot(loss)
+
+
+## Affichage des fonctions de perte
+Loss_array = np.array(Loss)
+Loss_array = Loss_array.flatten()
+plt.plot(Loss_average)
+plt.figure()
+plt.plot(Loss_array)
+
+print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
+print("Temps d'entrainement du modele choisi (s) ", t_fin_training - t_fin_dict)
