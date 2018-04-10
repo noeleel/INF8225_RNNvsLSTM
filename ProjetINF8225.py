@@ -24,7 +24,8 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 from torch import nn, zeros, LongTensor, optim
 from time import time
-from torch.nn import init
+import torch
+import sklearn
 
 """# Mise en forme du corpus 
 data_to_idx = {}
@@ -56,9 +57,16 @@ for sentence in b.tagged_sents() :
     words = [w[0] for w in sentence]
     tags = [w[1] for w in sentence]
     training_data.append((words,tags))
-training_data=training_data[:5000]
 
 
+#validation_set = training_data[5000:7000]
+#test_set = training_data[7000:8000]
+#train_data=training_data[:5000]
+
+
+validation_set = training_data[500:700]
+test_set = training_data[700:800]
+train_data=training_data[:500]
 
 def prepare_sequence(seq, to_ix):
     idxs = [to_ix[w] for w in seq]
@@ -124,16 +132,18 @@ optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
 # See what the scores are before training
 # Note that element i,j of the output is the score for tag j for word i.
-inputs = prepare_sequence(training_data[0][0], word_to_ix)
+inputs = prepare_sequence(train_data[0][0], word_to_ix)
 #tag_scores = model(inputs)
 #print(tag_scores)
 
 Loss = []
-for epoch in range(20):
+validation_accuracy = []
+accuracy = 0
+for epoch in range(10):
 # NE PAS DECOMMENTER, avec 100 epochs, il faut AU MOINS 1 h de traitement
 #for epoch in range(100): 
     print(epoch)
-    for sentence, tags in training_data:
+    for sentence, tags in train_data:
         # Step 1. Remember that Pytorch accumulates gradients.
         # We need to clear them out before each instance
         model.zero_grad()
@@ -156,7 +166,53 @@ for epoch in range(20):
         loss.backward()
         optimizer.step()
         Loss.append(loss)
+         #validation loop
+        error_rate = 0
+    for sentence, tags in validation_set :
+        model.zero_grad()
+        model.hidden = model.init_hidden()
+        sentence_in = prepare_sequence(sentence, word_to_ix)
+        #making predictions
+        _,tags_predictions = torch.max(model(sentence_in), dim=1)
 
+        #computing targets
+        targets = prepare_sequence(tags, tag_to_ix)
+        
+        #list in wich we store the rigth predictions for the given setence
+        sentence_prediction = []
+        
+        for i in range(len(targets)) :
+            #for each word, one if it's the good tag, 0 otherwise
+            sentence_prediction.append(int(targets[i]==tags_predictions[i]))
+            
+        #sum of the errors
+        error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
+        accuracy = sklearn.metrics.f1_score(targets.data.numpy(),sentence_prediction,average = 'micro')
+        validation_accuracy.append(accuracy)
+  
+#predictions on the test set
+test_error_rate = 0
+for sentence, tags in test_set :
+        model.zero_grad()
+        model.hidden = model.init_hidden()
+        sentence_in = prepare_sequence(sentence, word_to_ix)
+        #making the predictions
+        _,tags_predictions = torch.max(model(sentence_in), dim=1)
+
+        #computing the accuracy
+        targets = prepare_sequence(tags, tag_to_ix)
+        
+        sentence_prediction = []
+        
+        for i in range(len(targets)) :
+            #for each word, one if it's the good tag, 0 otherwise
+            sentence_prediction.append(int(targets[i]==tags_predictions[i]))
+        test_error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
+        
+test_error_rate = test_error_rate/len(test_set)
+print(test_error_rate)
+plt.figure()
+plt.plot(validation_accuracy)
 
 # The sentence is "the dog ate the apple".  i,j corresponds to score for tag j
 #  for word i. The predicted tag is the maximum scoring tag.
@@ -164,12 +220,12 @@ for epoch in range(20):
 # since 0 is index of the maximum value of row 1,
 # 1 is the index of maximum value of row 2, etc.
 # Which is DET NOUN VERB DET NOUN, the correct sequence!
-print(tag_scores)
 
 t_fin_training = time()
 Loss_array = np.array(Loss)
 Loss_array = Loss_array.flatten()
-plt.plot(Loss_array)
+#plt.figure()
+#plt.plot(Loss_array)
 
 print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
 print("Temps d'entrainement du modele choisi (s) ", t_fin_training - t_fin_dict)
