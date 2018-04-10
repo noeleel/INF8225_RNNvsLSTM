@@ -56,7 +56,7 @@ for sentence in b.tagged_sents() :
     words = [w[0] for w in sentence]
     tags = [w[1] for w in sentence]
     training_data.append((words,tags))
-training_data=training_data[:1000]
+training_data=training_data[:5000]
 
 
 
@@ -93,7 +93,8 @@ class GRU(nn.Module):
 
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        self.gru = nn.GRU(embedding_dim, hidden_dim)
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True )
+
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
         self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
@@ -105,11 +106,11 @@ class GRU(nn.Module):
         # Refer to the Pytorch documentation to see exactly
         # why they have this dimensionality.
         # The axes semantics are (num_layers, minibatch_size, hidden_dim)
-        return (autograd.Variable(zeros(1, 1, self.hidden_dim)),
-                autograd.Variable(zeros(1, 1, self.hidden_dim)))
-
+        return autograd.Variable(zeros(1, 1, self.hidden_dim))
+    
     def forward(self, sentence):
         embeds = self.word_embeddings(sentence)
+        #import pdb; pdb.set_trace()
         rnn_out, self.hidden = self.gru(
             embeds.view(len(sentence), 1, -1), self.hidden)
         tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
@@ -128,7 +129,7 @@ inputs = prepare_sequence(training_data[0][0], word_to_ix)
 #print(tag_scores)
 
 Loss = []
-for epoch in range(5):
+for epoch in range(20):
 # NE PAS DECOMMENTER, avec 100 epochs, il faut AU MOINS 1 h de traitement
 #for epoch in range(100): 
     print(epoch)
@@ -156,9 +157,7 @@ for epoch in range(5):
         optimizer.step()
         Loss.append(loss)
 
-# See what the scores are after training
-inputs = prepare_sequence(training_data[0][0], word_to_ix)
-tag_scores = model(inputs)
+
 # The sentence is "the dog ate the apple".  i,j corresponds to score for tag j
 #  for word i. The predicted tag is the maximum scoring tag.
 # Here, we can see the predicted sequence below is 0 1 2 0 1
