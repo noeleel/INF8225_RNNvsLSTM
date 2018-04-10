@@ -187,7 +187,7 @@ for epoch in range(10):
             
         #sum of the errors
         error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
-        accuracy = sklearn.metrics.f1_score(targets.data.numpy(),sentence_prediction,average = 'micro')
+        accuracy = sklearn.metrics.f1_score(targets.data.numpy(),tags_predictions.data.numpy(),average = 'micro')
         validation_accuracy.append(accuracy)
   
 #predictions on the test set
