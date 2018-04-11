@@ -62,8 +62,8 @@ for x in List_model :
     
     validation_accuracy = []
     accuracy = 0
+    print("Entrainement et validation du ", model.id)
     for epoch in range(N_EPOCHS):
-        print(epoch)
         Loss_epoch = []
         for sentence, tags in train_data:
             # Step 1. Remember that Pytorch accumulates gradients.
@@ -115,6 +115,7 @@ for x in List_model :
             accuracy = sklearn.metrics.f1_score(targets.data.numpy(),tags_predictions.data.numpy(),average = 'micro')
             validation_accuracy.append(accuracy)
       
+    print("Test du", model.id)
     #predictions on the test set
     test_error_rate = 0
     for sentence, tags in test_set :
