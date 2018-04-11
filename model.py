@@ -12,7 +12,7 @@ class SimpleGRU(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, vocab_size,  tagset_size):
         super().__init__()
         self.hidden_dim = hidden_dim
-        self.id = "Simple GRU"
+        self.id = "SimpleGRU"
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
         self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False )
@@ -49,7 +49,7 @@ class DoubleGRU(nn.Module):
         super().__init__()
         self.hidden_dim = hidden_dim
         
-        self.id = "Double GRU"
+        self.id = "DoubleGRU"
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
         self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = n_layers, batch_first = False )
@@ -87,7 +87,7 @@ class MultiGRU(nn.Module):
         super().__init__()
         self.hidden_dim = hidden_dim
         
-        self.id = "Multi GRU"
+        self.id = "MultiGRU"
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
@@ -126,7 +126,7 @@ class BatchGRU(nn.Module):
         self.hidden_dim = hidden_dim
         
         
-        self.id = "Batch GRU"
+        self.id = "BatchGRU"
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
@@ -166,7 +166,7 @@ class DropoutGRU(nn.Module):
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
         
-        self.id = "Dropout GRU"
+        self.id = "DropoutGRU"
         self.dropout = dropout
         self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = 2, batch_first = False )
 
@@ -204,7 +204,7 @@ class BiGRU(nn.Module):
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.bidirectional = bidirectional
-        self.id = "Bidirectional GRU"
+        self.id = "BidirectionalGRU"
         self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False )
 
         self.bias = True
@@ -240,7 +240,7 @@ class ComplexGRU(nn.Module):
         super().__init__()
         self.hidden_dim = hidden_dim
         
-        self.id = "Complex GRU"
+        self.id = "ComplexGRU"
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.bidirectional = bidirectional

@@ -65,6 +65,7 @@ for x in List_model :
     print("Entrainement et validation du ", model.id)
     for epoch in range(N_EPOCHS):
         Loss_epoch = []
+        #print(epoch)
         for sentence, tags in train_data:
             # Step 1. Remember that Pytorch accumulates gradients.
             # We need to clear them out before each instance
@@ -140,15 +141,22 @@ for x in List_model :
     print(test_error_rate*100, " % ")
     plt.figure()
     plt.title("Performance du modele ", model.id)
+    plt.xlabel("N_epochs")
+    plt.ylabel("Accuracy")
     plt.plot(validation_accuracy)
-    
+    plt.savefig(str("Images/Accuracy_of_" + model.id+".png"))
+    plt.close()
     
     t_fin_training = time()
     Loss_array = np.array(Loss)
     Loss_array = Loss_array.flatten()
     plt.figure()
-    plt.plot(Loss_array)
     plt.title("Perte du modele", model.id)
+    plt.xlabel("N_epochs")
+    plt.ylabel("Loss")
+    plt.plot(Loss_array)
+    plt.savefig(str("Images/Loss_of_" + model.id +".png"))
+    plt.close()
     
     print("Validation accuracy")
     print(np.mean(validation_accuracy)*100, " % ")
