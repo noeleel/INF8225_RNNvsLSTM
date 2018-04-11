@@ -17,215 +17,144 @@ des liens ici:
         https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
 
 """
-from nltk.corpus import brown as b
 import numpy as np
 import matplotlib.pyplot as plt
-import torch.autograd as autograd
-import torch.nn.functional as F
-from torch import nn, zeros, LongTensor, optim
+from torch import optim
 from time import time
 import torch
 import sklearn
+from dataset import word_to_ix, tag_to_ix,train_data,prepare_sequence, test_set, validation_set, t_fin_dict,t_init
+from model import SimpleGRU, DoubleGRU, MultiGRU, BatchGRU, DropoutGRU, BiGRU, ComplexGRU
+from parameters import EMBEDDING_DIM, HIDDEN_DIM, LEARNING_RATE, N_EPOCHS, loss_function, N_LAYERS, BIDIRECTIONAL, DROPOUT
 
-"""# Mise en forme du corpus 
-data_to_idx = {}
-tag_to_ix = {}
-
-data = []
-for sentence in b.tagged_sents():
-    L_w = []
-    L_t = []
-    for word, tag in sentence:
-        L_w.append(word)
-        L_t.append(tag)
-        data.append((L_w,L_t))
-        if word not in data_to_idx:
-            data_to_idx[word] = len(data_to_idx)
-        if tag not in tag_to_ix:
-            tag_to_ix[tag] = len(tag_to_ix)"""
-
-t_init = time()
-# Mise en forme de l'ensemble d'entrainement
-word_to_ix = {} # Dictionnaire associant chaque mot du corpus a un indice
-tag_to_ix = {} # Dictionnaire associant chaque tag NLTK a un indice
-
-
-training_data=[]
-for sentence in b.tagged_sents() :
-    words=[]
-    tags=[]
-    words = [w[0] for w in sentence]
-    tags = [w[1] for w in sentence]
-    training_data.append((words,tags))
-
-
-#validation_set = training_data[5000:7000]
-#test_set = training_data[7000:8000]
-#train_data=training_data[:5000]
-
-
-validation_set = training_data[500:700]
-test_set = training_data[700:800]
-train_data=training_data[:500]
-
-def prepare_sequence(seq, to_ix):
-    idxs = [to_ix[w] for w in seq]
-    tensor = LongTensor(idxs)
-    return autograd.Variable(tensor)
-
-word_to_ix = {}
-tag_to_ix ={}
-for sent, tags in training_data:
-    for word in sent:
-        if word not in word_to_ix:
-            word_to_ix[word] = len(word_to_ix)
-    for tag in tags :
-        if tag not in tag_to_ix :
-            tag_to_ix[tag] = len(tag_to_ix)
-#print(word_to_ix)
-
-# Parametres du modele, valeurs definies arbitraitement. Elles sont a modifier
-# En fonction des resultats obtenus pour les poids. 
-EMBEDDING_DIM = 300
-HIDDEN_DIM = 200
-
-t_fin_dict = time()
+print("Debut de la simulation")
 # DEFINITION DES MODELES 
 """ Partie d'Elodie """
-
-# RNN plus avancé  : le GRU
-class GRU(nn.Module):
-    def __init__(self, embedding_dim, hidden_dim, vocab_size, tagset_size):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-
-        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-
-        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True )
-
-        self.bias = True
-        # The linear layer that maps from hidden state space to tag space
-        self.hidden2tag = nn.Linear(hidden_dim, tagset_size)
-        self.hidden = self.init_hidden()
-
-
-    def init_hidden(self):
-        # Before we've done anything, we dont have any hidden state.
-        # Refer to the Pytorch documentation to see exactly
-        # why they have this dimensionality.
-        # The axes semantics are (num_layers, minibatch_size, hidden_dim)
-        return autograd.Variable(zeros(1, 1, self.hidden_dim))
-    
-    def forward(self, sentence):
-        embeds = self.word_embeddings(sentence)
-        #import pdb; pdb.set_trace()
-        rnn_out, self.hidden = self.gru(
-            embeds.view(len(sentence), 1, -1), self.hidden)
-        tag_space = self.hidden2tag(rnn_out.view(len(sentence), -1))
-        tag_scores = F.log_softmax(tag_space, dim=1)
-        return tag_scores
-
-# Choix du modele, de la fonction de perte et de la fonction d'optimisation du modele
-model = GRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
-loss_function = nn.NLLLoss()
-optimizer = optim.SGD(model.parameters(), lr = 0.01)
-
-# See what the scores are before training
-# Note that element i,j of the output is the score for tag j for word i.
-inputs = prepare_sequence(train_data[0][0], word_to_ix)
-#tag_scores = model(inputs)
-#print(tag_scores)
-
-Loss = []
-validation_accuracy = []
-accuracy = 0
-for epoch in range(10):
-# NE PAS DECOMMENTER, avec 100 epochs, il faut AU MOINS 1 h de traitement
-#for epoch in range(100): 
-    print(epoch)
-    for sentence, tags in train_data:
-        # Step 1. Remember that Pytorch accumulates gradients.
-        # We need to clear them out before each instance
-        model.zero_grad()
-
-        # Also, we need to clear out the hidden state of the LSTM,
-        # detaching it from its history on the last instance.
-        model.hidden = model.init_hidden()
-
-        # Step 2. Get our inputs ready for the network, that is, turn them into
-        # Variables of word indices.
-        sentence_in = prepare_sequence(sentence, word_to_ix)
-        targets = prepare_sequence(tags, tag_to_ix)
-
-        # Step 3. Run our forward pass.
-        tag_scores = model(sentence_in)
-
-        # Step 4. Compute the loss, gradients, and update the parameters by
-        #  calling optimizer.step()
-        loss = loss_function(tag_scores, targets)
-        loss.backward()
-        optimizer.step()
-        Loss.append(loss)
-         #validation loop
-        error_rate = 0
-    for sentence, tags in validation_set :
-        model.zero_grad()
-        model.hidden = model.init_hidden()
-        sentence_in = prepare_sequence(sentence, word_to_ix)
-        #making predictions
-        _,tags_predictions = torch.max(model(sentence_in), dim=1)
-
-        #computing targets
-        targets = prepare_sequence(tags, tag_to_ix)
-        
-        #list in wich we store the rigth predictions for the given setence
-        sentence_prediction = []
-        
-        for i in range(len(targets)) :
-            #for each word, one if it's the good tag, 0 otherwise
-            sentence_prediction.append(int(targets[i]==tags_predictions[i]))
-            
-        #sum of the errors
-        error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
-        accuracy = sklearn.metrics.f1_score(targets.data.numpy(),tags_predictions.data.numpy(),average = 'micro')
-        validation_accuracy.append(accuracy)
-  
-#predictions on the test set
-test_error_rate = 0
-for sentence, tags in test_set :
-        model.zero_grad()
-        model.hidden = model.init_hidden()
-        sentence_in = prepare_sequence(sentence, word_to_ix)
-        #making the predictions
-        _,tags_predictions = torch.max(model(sentence_in), dim=1)
-
-        #computing the accuracy
-        targets = prepare_sequence(tags, tag_to_ix)
-        
-        sentence_prediction = []
-        
-        for i in range(len(targets)) :
-            #for each word, one if it's the good tag, 0 otherwise
-            sentence_prediction.append(int(targets[i]==tags_predictions[i]))
-        test_error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
-        
-test_error_rate = test_error_rate/len(test_set)
-print(test_error_rate)
-plt.figure()
-plt.plot(validation_accuracy)
-
-# The sentence is "the dog ate the apple".  i,j corresponds to score for tag j
-#  for word i. The predicted tag is the maximum scoring tag.
-# Here, we can see the predicted sequence below is 0 1 2 0 1
-# since 0 is index of the maximum value of row 1,
-# 1 is the index of maximum value of row 2, etc.
-# Which is DET NOUN VERB DET NOUN, the correct sequence!
-
-t_fin_training = time()
-Loss_array = np.array(Loss)
-Loss_array = Loss_array.flatten()
-#plt.figure()
-#plt.plot(Loss_array)
+List_model = [SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
+              DoubleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
+              MultiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix),N_LAYERS),
+              BatchGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
+              DropoutGRU(EMBEDDING_DIM, HIDDEN_DIM,  len(word_to_ix), len(tag_to_ix), DROPOUT),
+              BiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix), BIDIRECTIONAL),
+              ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS)]
+          
+#List_model = [ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS)]
 
 print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
-print("Temps d'entrainement du modele choisi (s) ", t_fin_training - t_fin_dict)
+
+for x in List_model :
+    model = x
+    print("")
+    print(model.id)    
+    print("")
+    # RNN plus avancé  : le GRU
+    t_debut_model = time()
+    # Choix du modele, de la fonction de perte et de la fonction d'optimisation du modele
+    model = SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
+    
+    optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
+    # See what the scores are before training
+    # Note that element i,j of the output is the score for tag j for word i.
+    #tag_scores = model(inputs)
+    #print(tag_scores)
+    
+    Loss = []
+    
+    validation_accuracy = []
+    accuracy = 0
+    for epoch in range(N_EPOCHS):
+        print(epoch)
+        Loss_epoch = []
+        for sentence, tags in train_data:
+            # Step 1. Remember that Pytorch accumulates gradients.
+            # We need to clear them out before each instance
+            model.zero_grad()
+    
+            # Also, we need to clear out the hidden state of the LSTM,
+            # detaching it from its history on the last instance.
+            model.hidden = model.init_hidden()
+    
+            # Step 2. Get our inputs ready for the network, that is, turn them into
+            # Variables of word indices.
+            sentence_in = prepare_sequence(sentence, word_to_ix)
+            targets = prepare_sequence(tags, tag_to_ix)
+    
+            # Step 3. Run our forward pass.
+            tag_scores = model(sentence_in)
+    
+            # Step 4. Compute the loss, gradients, and update the parameters by
+            #  calling optimizer.step()
+            loss = loss_function(tag_scores, targets)
+            loss.backward()
+            optimizer.step()
+            Loss_epoch.append(loss)
+        Loss.append(np.mean(Loss_epoch))
+        
+        #validation loop
+        error_rate = 0
+            
+        for sentence, tags in validation_set :
+            model.zero_grad()
+            model.hidden = model.init_hidden()
+            sentence_in = prepare_sequence(sentence, word_to_ix)
+            #making predictions
+            _,tags_predictions = torch.max(model(sentence_in), dim=1)
+    
+            #computing targets
+            targets = prepare_sequence(tags, tag_to_ix)
+            
+            #list in wich we store the rigth predictions for the given setence
+            sentence_prediction = []
+            
+            for i in range(len(targets)) :
+                #for each word, one if it's the good tag, 0 otherwise
+                sentence_prediction.append(int(targets[i]==tags_predictions[i]))
+                
+            #sum of the errors
+            error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
+            accuracy = sklearn.metrics.f1_score(targets.data.numpy(),tags_predictions.data.numpy(),average = 'micro')
+            validation_accuracy.append(accuracy)
+      
+    #predictions on the test set
+    test_error_rate = 0
+    for sentence, tags in test_set :
+            model.zero_grad()
+            model.hidden = model.init_hidden()
+            sentence_in = prepare_sequence(sentence, word_to_ix)
+            #making the predictions
+            _,tags_predictions = torch.max(model(sentence_in), dim=1)
+    
+            #computing the accuracy
+            targets = prepare_sequence(tags, tag_to_ix)
+            
+            sentence_prediction = []
+            
+            for i in range(len(targets)) :
+                #for each word, one if it's the good tag, 0 otherwise
+                sentence_prediction.append(int(targets[i]==tags_predictions[i]))
+            test_error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
+            
+    test_error_rate = test_error_rate/len(test_set)
+    print("Test error rate")
+    print(test_error_rate*100, " % ")
+    plt.figure()
+    plt.title("Performance du modele ", model.id)
+    plt.plot(validation_accuracy)
+    
+    
+    t_fin_training = time()
+    Loss_array = np.array(Loss)
+    Loss_array = Loss_array.flatten()
+    plt.figure()
+    plt.plot(Loss_array)
+    plt.title("Perte du modele", model.id)
+    
+    print("Validation accuracy")
+    print(np.mean(validation_accuracy)*100, " % ")
+
+    print("Temps d'entrainement du modele choisi (s) ", t_fin_training - t_debut_model)
+    print("")
+    print("FIN DU MODELE ", List_model.index(x))
+    print("")
+    
+print("Fin de la simulation")
