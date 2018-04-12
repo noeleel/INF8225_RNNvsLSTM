@@ -30,27 +30,26 @@ from parameters import EMBEDDING_DIM, HIDDEN_DIM, LEARNING_RATE, N_EPOCHS, loss_
 print("Debut de la simulation")
 # DEFINITION DES MODELES 
 """ Partie d'Elodie """
-List_model = [SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
-              DoubleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
-              MultiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix),N_LAYERS),
-              BatchGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
-              DropoutGRU(EMBEDDING_DIM, HIDDEN_DIM,  len(word_to_ix), len(tag_to_ix), DROPOUT),
+
+#MultiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix),N_LAYERS),
+#DoubleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
+#DropoutGRU(EMBEDDING_DIM, HIDDEN_DIM,  len(word_to_ix), len(tag_to_ix), DROPOUT)
+#ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS)
+              
+List_model = [BatchGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
               BiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix), BIDIRECTIONAL),
-              ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS)]
+              SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))]
           
-#List_model = [ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS)]
 
 print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
 
 for x in List_model :
     model = x
     print("")
-    print(model.id)    
+    print("********************* ", model.id," *********************")    
     print("")
     # RNN plus avancé  : le GRU
     t_debut_model = time()
-    # Choix du modele, de la fonction de perte et de la fonction d'optimisation du modele
-    model = SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))
     
     optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
     # See what the scores are before training
@@ -62,7 +61,7 @@ for x in List_model :
     
     validation_accuracy = []
     accuracy = 0
-    print("Entrainement et validation du ", model.id)
+    print("********************* Entrainement et validation du ", model.id," *********************")
     for epoch in range(N_EPOCHS):
         Loss_epoch = []
         #print(epoch)
@@ -116,7 +115,7 @@ for x in List_model :
             accuracy = sklearn.metrics.f1_score(targets.data.numpy(),tags_predictions.data.numpy(),average = 'micro')
             validation_accuracy.append(accuracy)
       
-    print("Test du", model.id)
+    print("********************* Test du", model.id," *********************")
     #predictions on the test set
     test_error_rate = 0
     for sentence, tags in test_set :
@@ -137,10 +136,10 @@ for x in List_model :
             test_error_rate += (len(sentence_prediction)-sum(sentence_prediction))/len(sentence_prediction)
             
     test_error_rate = test_error_rate/len(test_set)
-    print("Test error rate")
+    print("*********************Test error rate*********************")
     print(test_error_rate*100, " % ")
     plt.figure()
-    plt.title("Performance du modele ", model.id)
+    plt.title(str("Performance du modele "+ model.id))
     plt.xlabel("N_epochs")
     plt.ylabel("Accuracy")
     plt.plot(validation_accuracy)
@@ -151,19 +150,19 @@ for x in List_model :
     Loss_array = np.array(Loss)
     Loss_array = Loss_array.flatten()
     plt.figure()
-    plt.title("Perte du modele", model.id)
+    plt.title(str("Perte du modele"+ model.id))
     plt.xlabel("N_epochs")
     plt.ylabel("Loss")
     plt.plot(Loss_array)
     plt.savefig(str("Images/Loss_of_" + model.id +".png"))
     plt.close()
     
-    print("Validation accuracy")
+    print("*********************Validation accuracy*********************")
     print(np.mean(validation_accuracy)*100, " % ")
 
-    print("Temps d'entrainement du modele choisi (s) ", t_fin_training - t_debut_model)
+    print("Temps d'entrainement du modele choisi (s) : ", t_fin_training - t_debut_model)
     print("")
-    print("FIN DU MODELE ", List_model.index(x))
+    print("********************* FIN DU MODELE *********************", List_model.index(x))
     print("")
     
 print("Fin de la simulation")

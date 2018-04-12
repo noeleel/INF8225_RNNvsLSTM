@@ -15,7 +15,7 @@ class SimpleGRU(nn.Module):
         self.id = "SimpleGRU"
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True)
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -52,7 +52,7 @@ class DoubleGRU(nn.Module):
         self.id = "DoubleGRU"
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = n_layers, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = n_layers, batch_first = True )
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -91,7 +91,7 @@ class MultiGRU(nn.Module):
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False , num_layers = n_layers )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True, num_layers = n_layers )
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -130,7 +130,7 @@ class BatchGRU(nn.Module):
         
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
 
-        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True)
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -168,7 +168,7 @@ class DropoutGRU(nn.Module):
         
         self.id = "DropoutGRU"
         self.dropout = dropout
-        self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = 2, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, num_layers = 2, batch_first = True)
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -205,7 +205,7 @@ class BiGRU(nn.Module):
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.bidirectional = bidirectional
         self.id = "BidirectionalGRU"
-        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim, batch_first = True )
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
@@ -246,7 +246,7 @@ class ComplexGRU(nn.Module):
         self.bidirectional = bidirectional
         self.dropout = dropout
         
-        self.gru = nn.GRU(embedding_dim, hidden_dim,  num_layers = num_layers, batch_first = False )
+        self.gru = nn.GRU(embedding_dim, hidden_dim,  num_layers = num_layers, batch_first = True )
 
         self.bias = True
         # The linear layer that maps from hidden state space to tag space
