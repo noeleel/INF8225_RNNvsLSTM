@@ -5,21 +5,21 @@ __init__(self, mode, input_size, hidden_size, num_layers=1, bias=True, batch_fir
 	input_size : --
 	hidden_size : --
 	num_layers : -- ; A faire varier (cf. screen forum "RNN_Layers.pdf").
-	bias : False / True ; Laisser à True pour avoir un biais.
+	bias : False / True ; Laisser Ã  True pour avoir un biais.
 	batch_first : True / False ; A voir ?
-	dropout : probabilité qu'un élément soit ignoré (i.e. entre 0 et 1) ; A faire varier (/!\ Neccessite num_layers > 1).
-	dropout_state : ???
-	bidirectional : True / False (default) ; A voir ?
+	dropout : probabilitÃ© qu'un Ã©lÃ©ment soit ignorÃ© (i.e. entre 0 et 1) ; A faire varier (/!\ Neccessite num_layers > 1).
+	dropout_state : --
+	bidirectional : True / False (default) ; A faire varier.
 
 	
 
-SimpleRNN : 1 seule couche ; couche cachée avec masque Linéaire ; activation de sortie log_softmax.
+SimpleRNN : 1 seule couche ; couche cachÃ©e avec masque LinÃ©aire ; activation de sortie log_softmax.
 
-DoubleRNN : 2 couches ; couches cachées avec masque Linéaire ; activation de sortie log_softmax.
+DoubleRNN : 2 couches ; couches cachÃ©es avec masque LinÃ©aire ; activation de sortie log_softmax.
 
-MultiRNN : n couches (pour l'instant 10, à faire varier) ; couches cachées avec masque Linéaire ; activation de sortie log_softmax.
-	   Ajout de DROPOUT à tester (pour l'instant 0.5 - optimal - ou 0).
+MultiRNN : n couches (pour l'instant 10, Ã  faire varier) ; couches cachÃ©es avec masque LinÃ©aire ; activation de sortie log_softmax.
+	   Ajout de DROPOUT Ã  tester (pour l'instant 0.5 - optimal - ou 0).
 
-TestRNN : m couches ; couches cachées avec masque Linéaire ; activation de sortie ReLU/Tanh/Sigmoid/Log_Softmax
+TestRNN : m couches ; couches cachÃ©es avec masque LinÃ©aire ; activation de sortie ReLU/Tanh/Sigmoid/Log_Softmax
 
-SimpleBRNN : Bidirectional RNN pour un SimpleRNN. cf. https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks
+BidirectionalBRNN : Bidirectional RNN pour un SimpleRNN. cf. https://en.wikipedia.org/wiki/Bidirectional_recurrent_neural_networks
