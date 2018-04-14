@@ -1,22 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-L'idee de Vincent serait de faire du pos-tagging de texte en anglais notamment. On pourra alors comparer
-la performance d'un RNN et celle d'un LSTM. Pour se faire, on peut utiliser Pytorch et la librarie nltk,
-qui permet de faire automatiquement du pos-tagging de texte. On pourra alors calculer l'erreur entre
-un ensemble d'entrainement et un ensemble de test. Pour l'ensemble d'entrainement et l'ensemble de test, on peut
-utiliser la fonction brown.words()[indice_de_depart,indice_de_fin] du module nltk.corpus. Cette fonction compile
-un tres grand ensemble de phrases tires de differents ouvrages anglais. Pour plus d'information, je vous mets
-des liens ici:
-    Brown Corpus : https://en.wikipedia.org/wiki/Brown_Corpus
-    Tutoriel sur nltk : http://textminingonline.com/dive-into-nltk-part-iii-part-of-speech-tagging-and-pos-tagger
-    Site officiel de la librarie nltk : https://www.nltk.org/api/nltk.tag.html
-    Tutoriel pytorch pour coder les RNN\LSTM : http://pytorch.org/tutorials/beginner/nlp/sequence_models_tutorial.html
+from contextlib import redirect_stdout
 
-    Tous les tags NLTK sont references dans le dictionnaire tag_to_ix. Pour avoir un aperçu plus explicatif de la 
-    representation d'une partie des ces tags, on peut se referer a la documentation NLTK : 
-        https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
-
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 from torch import optim
@@ -107,66 +91,69 @@ def test_net(test_set,model):
         test_sent_f1score.append(sklearn.metrics.f1_score(array_target,array_pred,average='micro'))
         
     return(np.average(test_sent_f1score))
-print("Debut de la simulation")
-# DEFINITION DES MODELES 
-""" Partie d'Elodie """
 
-List_model = [ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS),
-              MultiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix),N_LAYERS),
-              DoubleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
-              DropoutGRU(EMBEDDING_DIM, HIDDEN_DIM,  len(word_to_ix), len(tag_to_ix), DROPOUT),
-              BiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix), BIDIRECTIONAL),
-              SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))]
- 
-print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
-
-for x in List_model :
-    model = x
-    print("")
-    print("********************* ", model.id," *********************")    
-    print("")
-    t_debut_model = time()
-    
-    optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
-   
-    loss = 0 #initialize the loss for the training_net function
-    validation_f1score = [] #lost of all the f1 score computed on the validation set
-
-    print("********************* Entrainement et validation du ", model.id," *********************")
-    for epoch in range(N_EPOCHS):
-        training_net(train_data,model)
-        epoch_score = validation_net(validation_set,model)
-        validation_f1score.append(epoch_score)
+with open('help.txt', 'w') as f:
+    with redirect_stdout(f):
+        print("Debut de la simulation")
+        # DEFINITION DES MODELES 
+        """ Partie d'Elodie """
         
-    t_fin_training = time()
-    print("********************* Test du", model.id," *********************")
-    #predictions on the test set
-    plt.figure()
-    plt.title(str("Performance du modele "+ model.id))
-    plt.xlabel("N_epochs")
-    plt.ylabel("Accuracy")
-    plt.xlim(-1,N_EPOCHS+1)
-    plt.ylim(0,1)
-    plt.plot(validation_f1score,"-.dk")
-    plt.savefig(str("Images/F1Score_of_" + model.id+".png"))
-    plt.close()
-    
-    test_score = test_net(test_set,model)
-    print('F1 score pour des phrases aleatoires du modele ', model.id)
-    print(test_score*100, " % ")
-    
-    test_score_short = test_net(short_test_set,model)
-    print('F1 score pour des phrases courtes du modele ', model.id)
-    print(test_score_short*100, " % ")
-    
-    test_score_long = test_net(long_test_set,model)
-    print('F1 score pour des phrases longues du modele ', model.id)
-    print(test_score_long*100, " % ")
-
-
-    print("Temps d'entrainement du modele choisi (s) : ", t_fin_training - t_debut_model)
-    print("")
-    print("********************* FIN DU MODELE ", model.id,"*********************")
-    print("")
-    
-print("Fin de la simulation")
+        List_model = [ComplexGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix),  len(tag_to_ix), BIDIRECTIONAL, DROPOUT, N_LAYERS),
+                      MultiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix),N_LAYERS),
+                      DoubleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix)),
+                      DropoutGRU(EMBEDDING_DIM, HIDDEN_DIM,  len(word_to_ix), len(tag_to_ix), DROPOUT),
+                      BiGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix), BIDIRECTIONAL),
+                      SimpleGRU(EMBEDDING_DIM, HIDDEN_DIM, len(word_to_ix), len(tag_to_ix))]
+         
+        print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
+        
+        for x in List_model :
+            model = x
+            print("")
+            print("********************* ", model.id," *********************")    
+            print("")
+            t_debut_model = time()
+            
+            optimizer = optim.SGD(model.parameters(), lr = LEARNING_RATE)
+           
+            loss = 0 #initialize the loss for the training_net function
+            validation_f1score = [] #lost of all the f1 score computed on the validation set
+        
+            print("********************* Entrainement et validation du ", model.id," *********************")
+            for epoch in range(N_EPOCHS):
+                training_net(train_data,model)
+                epoch_score = validation_net(validation_set,model)
+                validation_f1score.append(epoch_score)
+                
+            t_fin_training = time()
+            print("********************* Test du", model.id," *********************")
+            #predictions on the test set
+            plt.figure()
+            plt.title(str("Performance du modele "+ model.id))
+            plt.xlabel("N_epochs")
+            plt.ylabel("Accuracy")
+            plt.xlim(-1,N_EPOCHS+1)
+            plt.ylim(0,1)
+            plt.plot(validation_f1score,"-.dk")
+            plt.savefig(str("Images/F1Score_of_" + model.id+".png"))
+            plt.close()
+            
+            test_score = test_net(test_set,model)
+            print('F1 score pour des phrases aleatoires du modele ', model.id)
+            print(test_score*100, " % ")
+            
+            test_score_short = test_net(short_test_set,model)
+            print('F1 score pour des phrases courtes du modele ', model.id)
+            print(test_score_short*100, " % ")
+            
+            test_score_long = test_net(long_test_set,model)
+            print('F1 score pour des phrases longues du modele ', model.id)
+            print(test_score_long*100, " % ")
+        
+        
+            print("Temps d'entrainement du modele choisi (s) : ", t_fin_training - t_debut_model)
+            print("")
+            print("********************* FIN DU MODELE ", model.id,"*********************")
+            print("")
+            
+        print("Fin de la simulation")
