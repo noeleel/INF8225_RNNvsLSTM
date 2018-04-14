@@ -1,0 +1,93 @@
+Debut de la simulation
+Temps de generation du dictionnaire (s)  4.504866361618042
+
+*********************  ComplexGRU  *********************
+
+********************* Entrainement et validation du  ComplexGRU  *********************
+********************* Test du ComplexGRU  *********************
+F1 score pour des phrases aleatoires du modele  ComplexGRU
+64.7090394491  % 
+F1 score pour des phrases courtes du modele  ComplexGRU
+40.25  % 
+F1 score pour des phrases longues du modele  ComplexGRU
+65.4518642974  % 
+Temps d'entrainement du modele choisi (s) :  87.2186210155487
+
+********************* FIN DU MODELE  ComplexGRU *********************
+
+
+*********************  BidirectionalGRU  *********************
+
+********************* Entrainement et validation du  BidirectionalGRU  *********************
+********************* Test du BidirectionalGRU  *********************
+F1 score pour des phrases aleatoires du modele  BidirectionalGRU
+63.7886069124  % 
+F1 score pour des phrases courtes du modele  BidirectionalGRU
+38.75  % 
+F1 score pour des phrases longues du modele  BidirectionalGRU
+65.4837691849  % 
+Temps d'entrainement du modele choisi (s) :  101.09035062789917
+
+********************* FIN DU MODELE  BidirectionalGRU *********************
+
+
+*********************  SimpleGRU  *********************
+
+********************* Entrainement et validation du  SimpleGRU  *********************
+********************* Test du SimpleGRU  *********************
+F1 score pour des phrases aleatoires du modele  SimpleGRU
+64.0011613508  % 
+F1 score pour des phrases courtes du modele  SimpleGRU
+39.5  % 
+F1 score pour des phrases longues du modele  SimpleGRU
+65.1302492863  % 
+Temps d'entrainement du modele choisi (s) :  90.27419590950012
+
+********************* FIN DU MODELE  SimpleGRU *********************
+
+
+*********************  MultiGRU  *********************
+
+********************* Entrainement et validation du  MultiGRU  *********************
+********************* Test du MultiGRU  *********************
+F1 score pour des phrases aleatoires du modele  MultiGRU
+65.533993529  % 
+F1 score pour des phrases courtes du modele  MultiGRU
+41.9166666667  % 
+F1 score pour des phrases longues du modele  MultiGRU
+64.6098494929  % 
+Temps d'entrainement du modele choisi (s) :  93.70961952209473
+
+********************* FIN DU MODELE  MultiGRU *********************
+
+
+*********************  DoubleGRU  *********************
+
+********************* Entrainement et validation du  DoubleGRU  *********************
+********************* Test du DoubleGRU  *********************
+F1 score pour des phrases aleatoires du modele  DoubleGRU
+11.1814241429  % 
+F1 score pour des phrases courtes du modele  DoubleGRU
+3.08333333333  % 
+F1 score pour des phrases longues du modele  DoubleGRU
+14.1632537329  % 
+Temps d'entrainement du modele choisi (s) :  110.53110098838806
+
+********************* FIN DU MODELE  DoubleGRU *********************
+
+
+*********************  DropoutGRU  *********************
+
+********************* Entrainement et validation du  DropoutGRU  *********************
+********************* Test du DropoutGRU  *********************
+F1 score pour des phrases aleatoires du modele  DropoutGRU
+60.7421877068  % 
+F1 score pour des phrases courtes du modele  DropoutGRU
+37.5  % 
+F1 score pour des phrases longues du modele  DropoutGRU
+61.040717285  % 
+Temps d'entrainement du modele choisi (s) :  101.06523251533508
+
+********************* FIN DU MODELE  DropoutGRU *********************
+
+Fin de la simulation

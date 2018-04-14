@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 from torch import nn
+
 EMBEDDING_DIM = 300
 HIDDEN_DIM = 200
-N_EPOCHS = 10
+N_EPOCHS = 50
 LEARNING_RATE = 0.1
 loss_function = nn.NLLLoss()
 N_LAYERS = 1
 BIDIRECTIONAL = True
 DROPOUT = 0.5
+LEN_TRAIN = 10000
+LEN_VALID = 4000
+LEN_TEST = 2000
+
+
+TOTAL = LEN_TEST + LEN_VALID + LEN_TRAIN
