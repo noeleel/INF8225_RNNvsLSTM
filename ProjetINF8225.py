@@ -92,9 +92,12 @@ def test_net(test_set,model):
         
     return(np.average(test_sent_f1score))
 
-with open('help.txt', 'w') as f:
+print("Debut de la simulation")
+print("Temps de generation du dictionnaire (s) ", t_fin_dict - t_init)
+t_debut_training = time()
+
+with open('Resultats.txt', 'w') as f:
     with redirect_stdout(f):
-        print("Debut de la simulation")
         # DEFINITION DES MODELES 
         """ Partie d'Elodie """
         
@@ -156,4 +159,6 @@ with open('help.txt', 'w') as f:
             print("********************* FIN DU MODELE ", model.id,"*********************")
             print("")
             
-        print("Fin de la simulation")
+        
+print("Fin de la simulation")
+print("Temps d'entrainement global des modeles (s) : ", time() - t_debut_training)
