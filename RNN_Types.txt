@@ -17,8 +17,9 @@ SimpleRNN : 1 seule couche ; couche cachée avec masque Linéaire ; activation d
 
 DoubleRNN : 2 couches ; couches cachées avec masque Linéaire ; activation de sortie log_softmax.
 
-MultiRNN : n couches (pour l'instant 10, à faire varier) ; couches cachées avec masque Linéaire ; activation de sortie log_softmax.
-	   Ajout de DROPOUT à tester (pour l'instant 0.5 - optimal - ou 0).
+DoubleDropoutRNN : 2 couches ; couches cachées avec masque Linéaire ; dropout de 0.5 ; activation de sortie log_softmax.
+
+MultiRNN : n couches ; couches cachées avec masque Linéaire ; dropout de 0.5 ; activation de sortie log_softmax.
 
 TestRNN : m couches ; couches cachées avec masque Linéaire ; activation de sortie ReLU/Tanh/Sigmoid/Log_Softmax
 
