@@ -1,0 +1,31 @@
+Résultats modèles 10 epoch
+
+/!\ LR = 0.01 // LR = 0.1
+
+SimpleRNN : 
+Test error rate : 0.2738473850280634 // 0.24539276040857605
+Accuracy_1 			     // Accuracy_6
+Loss_average_1			     // Loss_average_6
+Loss_detail_1
+
+DoubleRNN :
+Test error rate : 0.2669682075479358 // 0.2500192714127245
+Accuracy_2			     // Accuracy_7
+Loss_average_2			     // Loss_average_7
+Loss_detail_2
+
+DoubleDropoutRNN :
+Test error rate : 0.31695189707538934 // 0.3615844362452909
+Accuracy_3			      // Accuracy_8
+Loss_average_3			      // Loss_average_8
+
+
+TestRNN_1 : (DoubleDropout + ReLu au lieu de log_softmax)
+Test error rate : 0.8907755897181452
+Accuracy_4
+Loss_average_4
+
+BidirectionalRNN :
+Test error rate : 0.21894809861016262
+Accuracy_5
+Loss_average_5
