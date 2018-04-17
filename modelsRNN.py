@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-FICHIER DES MODELES RNN
-"""
+
+""" DEFINITION DES MODELES RNNs """
 
 import torch.autograd as autograd
 import torch.nn.functional as F
