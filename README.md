@@ -33,14 +33,14 @@ GRU bidirectionnel	                              	75,59 %
   
  Ce git est organisé de la manière suivante :
  
-  datasetNLTK : Ce fichier permet le chargement du dictionnaire d'où sont issus les ensembles d'entraînement, de validation et de test. Nous utilisons le brown corpus fourni par la libraire NLTK de Python.
+-   datasetNLTK : Ce fichier permet le chargement du dictionnaire d'où sont issus les ensembles d'entraînement, de validation et de test. Nous utilisons le brown corpus fourni par la libraire NLTK de Python.
   
-  parameters : Ce fichier permet de définir les différents paramètres de l'étude ( la taille des ensembles, le nombre d'épisodes, le learning rate, etc...).
+-   parameters : Ce fichier permet de définir les différents paramètres de l'étude ( la taille des ensembles, le nombre d'épisodes, le learning rate, etc...).
   
-  modelGRU : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le SimpleGRU, le BiGRU (GRU Bidirectionnel), le DoubleGRU(GRU à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
+-   modelGRU : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le SimpleGRU, le BiGRU (GRU Bidirectionnel), le DoubleGRU(GRU à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
   
-  modelRNN : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le SimpleRNN, le BidirectionalRNN (RNN Bidirectionnel), le DoubleRNN(RNN à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
+-   modelRNN : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le SimpleRNN, le BidirectionalRNN (RNN Bidirectionnel), le DoubleRNN(RNN à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
   
-  modelLSTM : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le LSTMTagger, le LSTMTagger_bidir (LSTM Bidirectionnel), le LSTMTagger_bidir_2layers(LSTM bidirectionnel à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
+-   modelLSTM : Ce fichier contient nos tros modèles de GRU, codés à partir de l'architecture Pytorch, le LSTMTagger, le LSTMTagger_bidir (LSTM Bidirectionnel), le LSTMTagger_bidir_2layers(LSTM bidirectionnel à deux couches). Nous avons utilisé l'architecture fournie par la libraire PyTorch.
   
-  main : Ce fichier permet de lancer l'entraînement des réseaux neuronaux. Si vous souhaitez le lancer, pensez à créer un dossier "Images" là où vous sauvegarderez le programme Python afin que le programme puisse enregistrer correctement les images liées à chaque modèle ( Si cette étape n'est pas respectée, le programme risque de ne pas marcher correctement).
+-   main : Ce fichier permet de lancer l'entraînement des réseaux neuronaux. Si vous souhaitez le lancer, pensez à créer un dossier "Images" là où vous sauvegarderez le programme Python afin que le programme puisse enregistrer correctement les images liées à chaque modèle ( Si cette étape n'est pas respectée, le programme risque de ne pas marcher correctement).
