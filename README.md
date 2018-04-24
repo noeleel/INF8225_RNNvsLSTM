@@ -7,16 +7,26 @@ Ce projet est realisée dans le cadre du cours INF8225, enseigné à Polytechniq
   
   Dans ce projet, nous avons pour but de mettre en lumière et d'expliquer les différences entre les RNN et les LSTM dans le cadre du POS Tagging. Nos recherches dans la littérature (cf Références) nous ont amenés à élargir notre étude en y incluant les GRU. Nous obtenons donc les résultats suivants:
   
-  Architecture	                              F1score sur le Test set
-Vanilla RNN	                              	        72,16 %
+   Architecture                            F1score sur le Test set
+  
+Vanilla RNN                                         72,16 %
+
 RNN à deux couches	                              	73,31 %
+
 RNN bidirectionnel	                              	78,11 %
+
 LSTM simples	                              	      82,03 %
+
 LTSM à deux couches	                              	85,02 %
+
 LSTM bidirectionnel	                              	85,12 %
+
 LSTM à deux couches bidirectionnel                 	85,88 %
+
 GRU simple	                              	        75,36 %
+
 GRU à deux couches	                              	80,92 %
+
 GRU bidirectionnel	                              	75,59 %
 
   
