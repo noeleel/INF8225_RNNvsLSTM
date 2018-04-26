@@ -15,7 +15,7 @@ Ce projet est realisée dans le cadre du cours INF8225, enseigné à Polytechniq
 |LSTM simples	                        |      	      82,03 %       |
 |LTSM à deux couches	                |            	85,02 %       |
 |LSTM bidirectionnel	                |            	85,12 %       |
-|LSTM à deux couches bidirectionnel   |             85,88 %       |
+|LSTM à deux couches bidirectionnel   |             **85,88 %**       |
 |GRU simple	                          |    	        75,36 %       |
 |GRU à deux couches	                  |            	80,92 %       |
 |GRU bidirectionnel	                  |            	75,59 %       |
